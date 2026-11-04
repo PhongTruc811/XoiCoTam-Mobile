@@ -1,0 +1,9 @@
+appId: com.xoicotam.mobile.e2e
+---
+- runFlow: start.yaml
+- tapOn:
+    id: "audience-customer"
+- tapOn:
+    id: "customer-guest"
+- assertVisible:
+    id: "workspace-customer"

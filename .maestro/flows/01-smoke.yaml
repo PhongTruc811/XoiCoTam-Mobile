@@ -1,0 +1,11 @@
+appId: com.xoicotam.mobile.e2e
+name: "M01 - Open app and enter guest ordering"
+tags:
+  - smoke
+  - regression
+---
+- runFlow: ../shared/guest.yaml
+- assertVisible:
+    id: "nav-customer-menu"
+- assertVisible: "Một phần xôi, một buổi sáng ngon."
+- takeScreenshot: M01-guest-menu

@@ -1,0 +1,21 @@
+name: XoiCoTam iOS UI regression
+
+# Run manually until the simulator suite has been verified.
+jobs:
+  build_ios:
+    name: Build isolated E2E simulator app
+    type: build
+    params:
+      platform: ios
+      profile: e2e-test
+
+  maestro_test:
+    name: Run six independent Maestro scenarios
+    needs: [build_ios]
+    type: maestro
+    environment: preview
+    params:
+      build_id: ${{ needs.build_ios.outputs.build_id }}
+      flow_path: .maestro
+      retries: 0
+      record_screen: true

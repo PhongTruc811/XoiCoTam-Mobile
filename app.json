@@ -1,0 +1,74 @@
+{
+  "expo": {
+    "name": "XoiCoTam",
+    "slug": "XoiCoTam",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/logoIcon/logo.png",
+    "scheme": "xoicotam",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.xoicotam.mobile",
+      "icon": "./assets/images/logoIcon/logo.png",
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        }
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FFF3D6",
+        "foregroundImage": "./assets/images/logoIcon/logo.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/logoIcon/logo.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFF3D6",
+          "image": "./assets/images/logoIcon/logo.png",
+          "imageWidth": 112,
+          "resizeMode": "contain"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Cho phép Xôi Cô Tấm chọn ảnh cho bài đăng.",
+          "microphonePermission": false
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "ecd8dd11-3aab-49d6-8eb0-7014bde876a7"
+      }
+    },
+    "owner": "andrewcoder811"
+  }
+}

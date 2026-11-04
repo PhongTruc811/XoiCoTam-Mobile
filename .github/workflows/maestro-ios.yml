@@ -1,0 +1,115 @@
+name: Maestro iOS
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Test scope
+        type: choice
+        options: [smoke, regression, failure-demo]
+        default: smoke
+      repeat_count:
+        description: Runs on the same app binary
+        type: choice
+        options: ['1', '3']
+        default: '1'
+defaults:
+  run:
+    shell: bash
+permissions:
+  contents: read
+concurrency:
+  group: maestro-ios-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  ios:
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      EXPO_PUBLIC_E2E_MOCK_BACKEND: 'true'
+      CI: '1'
+      MAESTRO_VERSION: '2.12.1'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Prepare artifacts
+        run: |
+          mkdir -p .maestro-artifacts
+          xcodebuild -version | tee .maestro-artifacts/xcode-version.txt
+      - name: Install dependencies
+        run: npm ci
+      - name: Check app code
+        run: |
+          npm run lint -- --no-cache
+          npm run typecheck
+          npm test
+      - name: Generate native iOS project on the runner
+        run: npx expo prebuild --platform ios --no-install
+      - name: Install CocoaPods
+        run: pod install --project-directory=ios
+      - name: Choose iPhone simulator
+        run: node scripts/select-ios-simulator.cjs
+      - name: Boot simulator
+        run: |
+          if [ "$SIMULATOR_STATE" != "Booted" ]; then
+            xcrun simctl boot "$SIMULATOR_UDID"
+          fi
+          xcrun simctl bootstatus "$SIMULATOR_UDID" -b
+          xcrun simctl ui "$SIMULATOR_UDID" appearance light
+          defaults write com.apple.iphonesimulator ConnectHardwareKeyboard -bool false
+      - name: Build and install simulator app without code signing
+        run: |
+          workspaces=(ios/*.xcworkspace)
+          workspace="${workspaces[0]}"
+          test -d "$workspace"
+          scheme="$(basename "$workspace" .xcworkspace)"
+          xcodebuild -workspace "$workspace" -scheme "$scheme" \
+            -configuration Release -sdk iphonesimulator \
+            -destination "id=$SIMULATOR_UDID" \
+            -derivedDataPath "$RUNNER_TEMP/xoicotam-build" \
+            CODE_SIGNING_ALLOWED=NO build 2>&1 | tee .maestro-artifacts/xcodebuild.log
+          apps=("$RUNNER_TEMP/xoicotam-build/Build/Products/Release-iphonesimulator/"*.app)
+          test -d "${apps[0]}"
+          xcrun simctl install "$SIMULATOR_UDID" "${apps[0]}"
+      - name: Install Maestro CLI
+        run: |
+          curl --fail --location --retry 3 https://get.maestro.mobile.dev -o "$RUNNER_TEMP/install-maestro.sh"
+          bash "$RUNNER_TEMP/install-maestro.sh"
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+      - name: Run Maestro
+        env:
+          TEST_SUITE: ${{ inputs.suite }}
+          REPEAT_COUNT: ${{ inputs.repeat_count }}
+        run: |
+          case "$TEST_SUITE" in
+            smoke) flow=.maestro/flows/01-smoke.yaml ;;
+            regression) flow=.maestro ;;
+            failure-demo) flow=.maestro/examples/intentional-failure.yaml ;;
+            *) exit 2 ;;
+          esac
+          case "$REPEAT_COUNT" in 1|3) ;; *) exit 2 ;; esac
+          maestro --version | tee .maestro-artifacts/maestro-version.txt
+          for ((attempt=1; attempt<=REPEAT_COUNT; attempt++)); do
+            output_dir="$GITHUB_WORKSPACE/.maestro-artifacts/run-$attempt"
+            mkdir -p "$output_dir"
+            maestro --device "$SIMULATOR_UDID" test --format JUNIT \
+              --output "$output_dir/results.xml" \
+              --test-output-dir "$output_dir" --debug-output "$output_dir/debug" "$flow"
+          done
+      - name: Save logs and screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: maestro-ios-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .maestro-artifacts/
+          include-hidden-files: true
+          retention-days: 3
+          if-no-files-found: warn

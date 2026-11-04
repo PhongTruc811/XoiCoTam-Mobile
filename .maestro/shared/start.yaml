@@ -1,0 +1,19 @@
+appId: com.xoicotam.mobile.e2e
+---
+# A new JS process resets the in-memory order reducer and role session.
+- launchApp:
+    clearState: true
+- scrollUntilVisible:
+    element:
+      id: "connection-check"
+    direction: DOWN
+- assertVisible:
+    id: "connection-target"
+    text: "E2E.*"
+- tapOn:
+    id: "connection-check"
+# Wait for the real connection-gate transition, including its reveal timer.
+- extendedWaitUntil:
+    visible:
+      id: "audience-customer"
+    timeout: 20000

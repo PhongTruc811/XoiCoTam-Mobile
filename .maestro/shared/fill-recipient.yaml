@@ -1,0 +1,36 @@
+appId: com.xoicotam.mobile.e2e
+---
+# Call from the menu before scrolling past the recipient form.
+# ASCII fixtures also work with iOS keyboard/inputText limitations.
+- scrollUntilVisible:
+    element:
+      id: "recipient-name"
+    direction: DOWN
+- tapOn:
+    id: "recipient-name"
+- inputText: "Maestro Customer"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "recipient-phone"
+    direction: DOWN
+- tapOn:
+    id: "recipient-phone"
+- inputText: "0900000099"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "recipient-address"
+    direction: DOWN
+- tapOn:
+    id: "recipient-address"
+- inputText: "12 Nguyen Van Cu, TP HCM"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "recipient-note"
+    direction: DOWN
+- tapOn:
+    id: "recipient-note"
+- inputText: "Khong hanh"
+- hideKeyboard

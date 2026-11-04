@@ -1,0 +1,57 @@
+appId: com.xoicotam.mobile.e2e
+name: "M02 - Reject missing recipient details and an invalid phone"
+tags:
+  - regression
+---
+- runFlow: ../shared/guest.yaml
+- scrollUntilVisible:
+    element:
+      id: "order-review"
+    direction: DOWN
+- tapOn:
+    id: "order-review"
+- scrollUntilVisible:
+    element:
+      id: "recipient-name-error"
+    direction: UP
+- assertVisible:
+    id: "recipient-name-error"
+    text: ".*Bạn hãy nhập tên người nhận.*"
+- scrollUntilVisible:
+    element:
+      id: "recipient-phone-error"
+    direction: DOWN
+- assertVisible:
+    id: "recipient-phone-error"
+    text: ".*Nhập số điện thoại hợp lệ.*"
+- scrollUntilVisible:
+    element:
+      id: "recipient-address-error"
+    direction: DOWN
+- assertVisible:
+    id: "recipient-address-error"
+    text: ".*Bạn hãy nhập địa chỉ giao hàng.*"
+- scrollUntilVisible:
+    element:
+      id: "recipient-phone"
+    direction: UP
+- tapOn:
+    id: "recipient-phone"
+- inputText: "123"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "order-review"
+    direction: DOWN
+- tapOn:
+    id: "order-review"
+- scrollUntilVisible:
+    element:
+      id: "recipient-phone-error"
+    direction: UP
+- assertVisible:
+    id: "recipient-phone-error"
+    text: ".*Nhập số điện thoại hợp lệ.*"
+- assertNotVisible:
+    id: "review-continue"
+- takeScreenshot: M02-invalid-recipient

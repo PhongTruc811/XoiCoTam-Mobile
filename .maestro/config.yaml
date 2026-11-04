@@ -1,0 +1,3 @@
+# Discover only independent scenarios; shared steps are called with runFlow.
+flows:
+  - "flows/*"

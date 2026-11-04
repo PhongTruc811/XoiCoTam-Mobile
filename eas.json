@@ -1,0 +1,17 @@
+{
+  "cli": {
+    "appVersionSource": "local"
+  },
+  "build": {
+    "e2e-test": {
+      "environment": "preview",
+      "withoutCredentials": true,
+      "env": {
+        "EXPO_PUBLIC_E2E_MOCK_BACKEND": "true"
+      },
+      "ios": {
+        "simulator": true
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+appId: com.xoicotam.mobile.e2e
+name: "M03 - Change meal size and preserve the correct review price"
+tags:
+  - regression
+---
+- runFlow: ../shared/guest.yaml
+- scrollUntilVisible:
+    element:
+      id: "meal-20000"
+    direction: DOWN
+- tapOn:
+    id: "meal-20000"
+- scrollUntilVisible:
+    element:
+      id: "meal-30000"
+    direction: DOWN
+- tapOn:
+    id: "meal-30000"
+- runFlow: ../shared/fill-recipient.yaml
+- scrollUntilVisible:
+    element:
+      id: "menu-total"
+    direction: DOWN
+- assertVisible:
+    id: "menu-total"
+    text: "30.000 ₫"
+- runFlow: ../shared/review.yaml
+- scrollUntilVisible:
+    element:
+      id: "review-price"
+    direction: UP
+- assertVisible:
+    id: "review-price"
+    text: "30.000 ₫"
+- takeScreenshot: M03-meal-review

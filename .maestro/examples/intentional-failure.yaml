@@ -1,0 +1,6 @@
+appId: com.xoicotam.mobile.e2e
+name: "DEMO ONLY - Intentional failed UI assertion"
+---
+# Excluded from config.yaml. Run explicitly to demonstrate failure reporting.
+- runFlow: ../shared/guest.yaml
+- assertVisible: "INTENTIONAL_FAILURE_ELEMENT_DOES_NOT_EXIST"

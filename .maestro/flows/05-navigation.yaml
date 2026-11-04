@@ -1,0 +1,33 @@
+appId: com.xoicotam.mobile.e2e
+name: "M05 - Back navigation preserves the recipient form"
+tags:
+  - regression
+---
+- runFlow: ../shared/guest.yaml
+- runFlow: ../shared/fill-recipient.yaml
+- runFlow: ../shared/review.yaml
+- tapOn:
+    id: "workspace-back"
+- scrollUntilVisible:
+    element:
+      id: "recipient-name"
+    direction: DOWN
+- assertVisible:
+    id: "recipient-name"
+    text: "Maestro Customer"
+- scrollUntilVisible:
+    element:
+      id: "recipient-phone"
+    direction: DOWN
+- assertVisible:
+    id: "recipient-phone"
+    text: "0900000099"
+- scrollUntilVisible:
+    element:
+      id: "recipient-address"
+    direction: DOWN
+- assertVisible:
+    id: "recipient-address"
+    text: "12 Nguyen Van Cu, TP HCM"
+- runFlow: ../shared/review.yaml
+- takeScreenshot: M05-preserved-form

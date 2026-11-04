@@ -1,0 +1,58 @@
+appId: com.xoicotam.mobile.e2e
+name: "M04 - Confirm a COD order and find it in my orders"
+tags:
+  - regression
+---
+- runFlow: ../shared/guest.yaml
+- scrollUntilVisible:
+    element:
+      id: "meal-30000"
+    direction: DOWN
+- tapOn:
+    id: "meal-30000"
+- runFlow: ../shared/fill-recipient.yaml
+- runFlow: ../shared/review.yaml
+- scrollUntilVisible:
+    element:
+      id: "review-continue"
+    direction: DOWN
+- tapOn:
+    id: "review-continue"
+- scrollUntilVisible:
+    element:
+      id: "payment-submit"
+    direction: DOWN
+- tapOn:
+    id: "payment-submit"
+- scrollUntilVisible:
+    element:
+      id: "cod-confirm"
+    direction: DOWN
+- tapOn:
+    id: "cod-confirm"
+- extendedWaitUntil:
+    visible:
+      text: ".*Đặt món thành công.*mô phỏng.*"
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: "customer-order-.*-name"
+      text: "Maestro Customer"
+    direction: DOWN
+- assertVisible:
+    id: "customer-order-.*-name"
+    text: "Maestro Customer"
+- scrollUntilVisible:
+    element:
+      id: "customer-order-.*-price"
+      text: "30.000 ₫"
+    direction: UP
+- assertVisible:
+    id: "customer-order-.*-price"
+    text: "30.000 ₫"
+- scrollUntilVisible:
+    element:
+      text: ".*Chưa thanh toán.*Thanh toán khi nhận hàng.*"
+    direction: DOWN
+- assertVisible: ".*Chưa thanh toán.*Thanh toán khi nhận hàng.*"
+- takeScreenshot: M04-cod-created

@@ -1,0 +1,15 @@
+appId: com.xoicotam.mobile.e2e
+---
+- scrollUntilVisible:
+    element:
+      id: "order-review"
+    direction: DOWN
+- tapOn:
+    id: "order-review"
+- scrollUntilVisible:
+    element:
+      id: "review-name"
+    direction: DOWN
+- assertVisible:
+    id: "review-name"
+    text: "Maestro Customer"

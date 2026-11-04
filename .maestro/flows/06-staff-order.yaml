@@ -1,0 +1,65 @@
+appId: com.xoicotam.mobile.e2e
+name: "M06 - Reject an invalid PIN and accept a seeded order as staff"
+tags:
+  - regression
+---
+- runFlow: ../shared/start.yaml
+- tapOn:
+    id: "audience-employee"
+- tapOn:
+    id: "employee-pin-0"
+- tapOn:
+    id: "employee-pin-0"
+- tapOn:
+    id: "employee-pin-0"
+- tapOn:
+    id: "employee-pin-0"
+- tapOn:
+    id: "employee-pin-0"
+- tapOn:
+    id: "employee-pin-0"
+- assertVisible:
+    id: "employee-pin-error"
+    text: "Mật mã chưa đúng. Bạn thử lại nhé."
+- tapOn:
+    id: "employee-pin-2"
+- tapOn:
+    id: "employee-pin-4"
+- tapOn:
+    id: "employee-pin-6"
+- tapOn:
+    id: "employee-pin-8"
+- tapOn:
+    id: "employee-pin-1"
+- tapOn:
+    id: "employee-pin-0"
+- extendedWaitUntil:
+    visible:
+      id: "role-staff"
+    timeout: 10000
+- tapOn:
+    id: "role-staff"
+- assertVisible:
+    id: "workspace-staff"
+# XCT-1001 is a fixed seed, not a generated order ID.
+- scrollUntilVisible:
+    element:
+      id: "staff-accept-XCT-1001"
+    direction: DOWN
+- tapOn:
+    id: "staff-accept-XCT-1001"
+- assertNotVisible:
+    id: "staff-accept-XCT-1001"
+- scrollUntilVisible:
+    element:
+      id: "nav-staff-ready"
+    direction: UP
+- tapOn:
+    id: "nav-staff-ready"
+- scrollUntilVisible:
+    element:
+      id: "staff-handoff-XCT-1001"
+    direction: DOWN
+- assertVisible:
+    id: "staff-handoff-XCT-1001"
+- takeScreenshot: M06-staff-accepted

@@ -1,0 +1,28 @@
+name: XoiCoTam Maestro on an existing iOS build
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_id:
+        type: string
+        required: true
+        description: ID of a successful XoiCoTam E2E iOS Simulator build
+      flow_path:
+        type: choice
+        options:
+          - .maestro
+          - .maestro/flows/01-smoke.yaml
+          - .maestro/examples/intentional-failure.yaml
+        default: .maestro
+        description: Full regression, smoke test, or intentional failure demo
+
+jobs:
+  maestro_test:
+    name: Run Maestro without rebuilding the app
+    type: maestro
+    environment: preview
+    params:
+      build_id: ${{ inputs.build_id }}
+      flow_path: ${{ inputs.flow_path }}
+      retries: 0
+      record_screen: true
