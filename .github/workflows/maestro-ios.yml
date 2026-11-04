@@ -23,7 +23,7 @@ concurrency:
 jobs:
   ios:
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 90
     env:
       EXPO_PUBLIC_E2E_MOCK_BACKEND: 'true'
       CI: '1'
@@ -75,7 +75,7 @@ jobs:
             -configuration Release -sdk iphonesimulator \
             -destination "id=$SIMULATOR_UDID" \
             -derivedDataPath "$RUNNER_TEMP/xoicotam-build" \
-            CODE_SIGNING_ALLOWED=NO build 2>&1 | tee .maestro-artifacts/xcodebuild.log
+            CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=YES build 2>&1 | tee .maestro-artifacts/xcodebuild.log
           apps=("$RUNNER_TEMP/xoicotam-build/Build/Products/Release-iphonesimulator/"*.app)
           test -d "${apps[0]}"
           xcrun simctl install "$SIMULATOR_UDID" "${apps[0]}"
