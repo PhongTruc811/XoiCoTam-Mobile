@@ -9,7 +9,10 @@ appId: com.xoicotam.mobile.e2e
 - tapOn:
     id: "recipient-name"
 - inputText: "Maestro Customer"
-- hideKeyboard
+- swipe:
+    start: 50%, 60%
+    end: 50%, 30%
+    duration: 600
 - scrollUntilVisible:
     element:
       id: "recipient-phone"
@@ -17,7 +20,10 @@ appId: com.xoicotam.mobile.e2e
 - tapOn:
     id: "recipient-phone"
 - inputText: "0900000099"
-- hideKeyboard
+- swipe:
+    start: 50%, 60%
+    end: 50%, 30%
+    duration: 600
 - scrollUntilVisible:
     element:
       id: "recipient-address"
@@ -25,7 +31,10 @@ appId: com.xoicotam.mobile.e2e
 - tapOn:
     id: "recipient-address"
 - inputText: "12 Nguyen Van Cu, TP HCM"
-- hideKeyboard
+- swipe:
+    start: 50%, 60%
+    end: 50%, 30%
+    duration: 600
 - scrollUntilVisible:
     element:
       id: "recipient-note"
@@ -33,4 +42,7 @@ appId: com.xoicotam.mobile.e2e
 - tapOn:
     id: "recipient-note"
 - inputText: "Khong hanh"
-- hideKeyboard
+- swipe:
+    start: 50%, 60%
+    end: 50%, 30%
+    duration: 600

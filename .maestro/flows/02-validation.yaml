@@ -38,7 +38,10 @@ tags:
 - tapOn:
     id: "recipient-phone"
 - inputText: "123"
-- hideKeyboard
+- swipe:
+    start: 50%, 60%
+    end: 50%, 30%
+    duration: 600
 - scrollUntilVisible:
     element:
       id: "order-review"
