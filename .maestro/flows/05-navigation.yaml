@@ -1,3 +1,5 @@
+# Vai trò: Kiểm tra dữ liệu người nhận còn nguyên khi quay lại từ màn xem đơn.
+# Cách hoạt động: Điền biểu mẫu, mở trang xem lại, quay về kiểm tra rồi mở lại.
 appId: com.xoicotam.mobile.e2e
 name: "M05 - Back navigation preserves the recipient form"
 tags:
@@ -6,6 +8,7 @@ tags:
 - runFlow: ../shared/guest.yaml
 - runFlow: ../shared/fill-recipient.yaml
 - runFlow: ../shared/review.yaml
+# Quay lại từ màn xem đơn không được làm mất thông tin người nhận.
 - tapOn:
     id: "workspace-back"
 - scrollUntilVisible:

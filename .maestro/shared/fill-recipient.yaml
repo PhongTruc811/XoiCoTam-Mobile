@@ -1,7 +1,9 @@
+# Vai trò: Điền thông tin người nhận dùng chung cho các kịch bản đặt món.
+# Cách hoạt động: Cuộn tới từng ô, nhập dữ liệu mẫu rồi ẩn bàn phím.
 appId: com.xoicotam.mobile.e2e
 ---
-# Call from the menu before scrolling past the recipient form.
-# ASCII fixtures also work with iOS keyboard/inputText limitations.
+# Gọi từ menu trước khi cuộn qua biểu mẫu người nhận.
+# Dữ liệu mẫu dùng ký tự ASCII để tương thích với inputText trên iOS.
 - scrollUntilVisible:
     element:
       id: "recipient-name"

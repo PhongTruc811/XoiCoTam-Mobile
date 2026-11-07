@@ -2,10 +2,10 @@ import { createContext, useCallback, useContext, useMemo, useState, type PropsWi
 
 import { useBackendConnection } from '@/features/be-connection/provider';
 import { shipperNames, type ShipperName } from '@/features/order/model';
+import { canUseStaffOrders, staffApi, type StaffIdentity } from '@/features/order/staff-api';
 
 import type { Role } from './model';
 import { getEntryScreen, type Audience, type CustomerPath, type EntryScreen } from './navigation';
-import { isEmployeePinValid } from './employee-pin';
 
 type RoleSession = {
   role: Role | null;
@@ -18,9 +18,11 @@ type RoleSession = {
   continueFromConnection: () => void;
   goBack: () => void;
   clearRole: () => void;
-  pinPromptOpen: boolean;
-  verifyEmployeePin: (pin: string) => boolean;
-  cancelEmployeePin: () => void;
+  staffLoginOpen: boolean;
+  staffIdentity: StaffIdentity | null;
+  loginStaff: (username: string, password: string) => Promise<void>;
+  cancelStaffLogin: () => void;
+  staffSessionExpired: () => void;
 };
 
 const RoleSessionContext = createContext<RoleSession | null>(null);
@@ -33,33 +35,51 @@ export function RoleSessionProvider({ children }: PropsWithChildren) {
   const [shipperIdentity, setShipperIdentity] = useState<ShipperName | null>(null);
   const [connectionVisible, setConnectionVisible] = useState(false);
   const [employeeVerified, setEmployeeVerified] = useState(false);
-  const [pinPromptOpen, setPinPromptOpen] = useState(false);
+  const [staffLoginOpen, setStaffLoginOpen] = useState(false);
+  const [staffIdentity, setStaffIdentity] = useState<StaffIdentity | null>(null);
   const activeScreen = getEntryScreen(brandThemeEnabled, audience, customerPath, role, connectionVisible, shipperIdentity, employeeVerified);
 
   const chooseAudience = useCallback((next: Exclude<Audience, null>) => {
     if (!brandThemeEnabled) return;
     if (next === 'employee') {
-      setPinPromptOpen(true);
+      setStaffLoginOpen(true);
+      staffApi.me().then(identity => {
+        if (canUseStaffOrders(identity)) {
+          setStaffIdentity(identity);
+          setEmployeeVerified(true);
+          setStaffLoginOpen(false);
+          setAudience('employee');
+          setRole('staff');
+        }
+      }).catch(() => {});
       return;
     }
     setEmployeeVerified(false);
-    setPinPromptOpen(false);
+    setStaffLoginOpen(false);
     setAudience(next);
     setCustomerPath(null);
     setRole(null);
     setShipperIdentity(null);
   }, [brandThemeEnabled]);
-  const verifyEmployeePin = useCallback((pin: string) => {
-    if (!brandThemeEnabled || !pinPromptOpen || !isEmployeePinValid(pin)) return false;
+  const loginStaff = useCallback(async (username: string, password: string) => {
+    const identity = await staffApi.login(username, password);
+    if (!canUseStaffOrders(identity)) throw new Error('Tài khoản không có quyền xem đơn nhân viên.');
+    setStaffIdentity(identity);
     setEmployeeVerified(true);
-    setPinPromptOpen(false);
+    setStaffLoginOpen(false);
     setAudience('employee');
     setCustomerPath(null);
-    setRole(null);
+    setRole('staff');
     setShipperIdentity(null);
-    return true;
-  }, [brandThemeEnabled, pinPromptOpen]);
-  const cancelEmployeePin = useCallback(() => setPinPromptOpen(false), []);
+  }, []);
+  const cancelStaffLogin = useCallback(() => setStaffLoginOpen(false), []);
+  const staffSessionExpired = useCallback(() => {
+    setStaffIdentity(null);
+    setEmployeeVerified(false);
+    setRole(null);
+    setAudience(null);
+    setStaffLoginOpen(true);
+  }, []);
   const chooseCustomerPath = useCallback((next: Exclude<CustomerPath, null>) => {
     if (brandThemeEnabled && audience === 'customer') {
       setCustomerPath(next);
@@ -89,6 +109,11 @@ export function RoleSessionProvider({ children }: PropsWithChildren) {
     else if (activeScreen === 'customer-account' || activeScreen === 'customer') {
       setCustomerPath(null);
       setRole(null);
+    } else if (activeScreen === 'staff') {
+      setRole(null);
+      setAudience(null);
+      setEmployeeVerified(false);
+      setStaffIdentity(null);
     } else if (activeScreen === 'shipper') setShipperIdentity(null);
     else if (['staff', 'shipper-identity', 'boss'].includes(activeScreen)) {
       setRole(null);
@@ -101,7 +126,7 @@ export function RoleSessionProvider({ children }: PropsWithChildren) {
     setCustomerPath(null);
     setRole(null);
     setEmployeeVerified(false);
-    setPinPromptOpen(false);
+    setStaffLoginOpen(false);
   }, []);
   const value = useMemo(() => ({
     role,
@@ -114,10 +139,12 @@ export function RoleSessionProvider({ children }: PropsWithChildren) {
     continueFromConnection,
     goBack,
     clearRole,
-    pinPromptOpen,
-    verifyEmployeePin,
-    cancelEmployeePin,
-  }), [role, shipperIdentity, chooseShipperIdentity, activeScreen, chooseAudience, chooseCustomerPath, chooseEmployeeRole, continueFromConnection, goBack, clearRole, pinPromptOpen, verifyEmployeePin, cancelEmployeePin]);
+    staffLoginOpen,
+    staffIdentity,
+    loginStaff,
+    cancelStaffLogin,
+    staffSessionExpired,
+  }), [role, shipperIdentity, chooseShipperIdentity, activeScreen, chooseAudience, chooseCustomerPath, chooseEmployeeRole, continueFromConnection, goBack, clearRole, staffLoginOpen, staffIdentity, loginStaff, cancelStaffLogin, staffSessionExpired]);
 
   return <RoleSessionContext.Provider value={value}>{children}</RoleSessionContext.Provider>;
 }

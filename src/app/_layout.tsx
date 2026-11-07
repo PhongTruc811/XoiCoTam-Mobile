@@ -7,7 +7,7 @@ import { BackendConnectionProvider, useBackendConnection } from '@/features/be-c
 import { OrderDemoProvider } from '@/features/order/provider';
 import { entryScreens } from '@/features/session/navigation';
 import { RoleSessionProvider, useRoleSession } from '@/features/session/provider';
-import { EmployeePinModal } from '@/features/session/role/employee-pin-modal';
+import { StaffLoginModal } from '@/features/session/role/staff-login-modal';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -42,7 +42,7 @@ function AppNavigator() {
           </Stack.Protected>
         ))}
       </Stack>
-      <EmployeePinModal />
+      <StaffLoginModal />
       <AnimatedSplashOverlay />
     </ThemeProvider>
   );

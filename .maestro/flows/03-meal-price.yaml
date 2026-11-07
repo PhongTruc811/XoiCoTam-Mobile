@@ -1,3 +1,5 @@
+# Vai trò: Kiểm tra giá đơn sau khi đổi kích cỡ phần xôi.
+# Cách hoạt động: Chọn phần 20.000 rồi 30.000 đồng, so sánh tổng tiền ở menu và màn xem lại.
 appId: com.xoicotam.mobile.e2e
 name: "M03 - Change meal size and preserve the correct review price"
 tags:
@@ -10,6 +12,7 @@ tags:
     direction: DOWN
 - tapOn:
     id: "meal-20000"
+# Lựa chọn thứ hai phải thay thế lựa chọn đầu tiên trong toàn bộ đơn.
 - scrollUntilVisible:
     element:
       id: "meal-30000"

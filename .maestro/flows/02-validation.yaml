@@ -1,9 +1,12 @@
+# Vai trò: Kiểm tra biểu mẫu người nhận từ chối dữ liệu thiếu hoặc sai.
+# Cách hoạt động: Gửi biểu mẫu trống, thử số điện thoại sai rồi kiểm tra các lỗi hiển thị.
 appId: com.xoicotam.mobile.e2e
 name: "M02 - Reject missing recipient details and an invalid phone"
 tags:
   - regression
 ---
 - runFlow: ../shared/guest.yaml
+# Gửi biểu mẫu trống trước để kiểm tra từng trường bắt buộc.
 - scrollUntilVisible:
     element:
       id: "order-review"
@@ -42,6 +45,7 @@ tags:
     start: 50%, 60%
     end: 50%, 30%
     duration: 600
+# Số điện thoại đã nhập nhưng sai định dạng vẫn phải chặn bước xem lại đơn.
 - scrollUntilVisible:
     element:
       id: "order-review"

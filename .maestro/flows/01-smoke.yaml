@@ -1,3 +1,5 @@
+# Vai trò: Kiểm tra nhanh ứng dụng mở được và khách có thể vào màn hình đặt món.
+# Cách hoạt động: Dùng bước đăng nhập khách, kiểm tra nội dung menu rồi chụp màn hình.
 appId: com.xoicotam.mobile.e2e
 name: "M01 - Open app and enter guest ordering"
 tags:

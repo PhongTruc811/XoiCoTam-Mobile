@@ -139,9 +139,9 @@ function HistoryPanel({ data, busy, refresh, remove }: { data: Dashboard; busy: 
     {data.jobs.map(job => <View key={job.id} style={local.job}>
       <Pressable accessibilityRole="button" onPress={() => setExpanded(list => list.includes(job.id) ? list.filter(id => id !== job.id) : [...list, job.id])}>
         <ThemedText type="smallBold">{job.mode === 'PREPARE' ? 'Thử soạn bài' : job.source === 'SCHEDULE' ? 'Đăng theo lịch' : 'Đăng ngay'} · {statusLabel(job.status)}</ThemedText>
-        <Copy muted>{new Date(job.createdAt).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })} · {job.items.length} nhóm</Copy>
+        <Copy muted>{new Date(job.createdAt).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })} · {job.result.length} nhóm</Copy>
       </Pressable>
-      {(expanded.includes(job.id) || ['RUNNING', 'QUEUED'].includes(job.status)) && job.items.map(item => <View key={item.group.id} style={styles.gapSmall}>
+      {(expanded.includes(job.id) || ['RUNNING', 'QUEUED'].includes(job.status)) && job.result.map(item => <View key={item.group.id} style={styles.gapSmall}>
         <Copy>{item.group.name} · {statusLabel(item.status)}</Copy><Copy muted>{item.message}</Copy>
         {!!item.postUrl && <Button secondary label="Xem bài trên Facebook ↗" onPress={() => Linking.openURL(item.postUrl!)} />}
       </View>)}
@@ -178,7 +178,7 @@ export function DailyPostView() {
       if (!alive.current) return;
       setData(next); setError('');
       if (!initialized.current) {
-        setTimes(next.settings.times || ['06:00']); setEnabled(next.settings.enabled);
+        setTimes(next.settings.times || ['06:00']); setEnabled(next.settings.isEnabled);
         setSelected(next.content.groups.map(group => group.id)); initialized.current = true;
       }
     } catch (cause) {
@@ -267,7 +267,7 @@ export function DailyPostView() {
       <ContentPanel data={data} busy={working} editing={editing} setEditing={setEditing}
         save={async (text, retained, uploads) => action(async () => { await dailyApi.saveContent(text, retained, uploads); setEditing(false); setNotice('Đã lưu bài đăng. Các lượt tiếp theo sẽ dùng bản mới.'); })} />
       <SchedulePanel data={data} times={times} setTimes={setTimes} enabled={enabled} setEnabled={setEnabled} busy={working} now={now}
-        save={() => void action(async () => { if (new Set(times).size !== times.length) throw new Error('Mỗi lượt đăng cần một giờ khác nhau.'); const saved = await dailyApi.saveSettings(enabled, times); setTimes(saved.times); setEnabled(saved.enabled); setNotice('Đã lưu các giờ đăng.'); })} />
+        save={() => void action(async () => { if (new Set(times).size !== times.length) throw new Error('Mỗi lượt đăng cần một giờ khác nhau.'); const saved = await dailyApi.saveSettings(enabled, times); setTimes(saved.times); setEnabled(saved.isEnabled); setNotice('Đã lưu các giờ đăng.'); })} />
       <PublishPanel data={data} selected={selected} setSelected={setSelected} pending={pending} busy={working || !pendingLoaded} editing={editing} now={now}
         post={() => void post()} pause={() => void action(async () => { if (data.settings.pausedDay === data.today) await dailyApi.resume(); else await dailyApi.pause(); setNotice(data.settings.pausedDay === data.today ? 'Đã tiếp tục hôm nay.' : 'Đã dừng hôm nay.'); })} />
       <HistoryPanel data={data} busy={working} refresh={() => void refresh()} remove={remove} />

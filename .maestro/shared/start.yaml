@@ -1,6 +1,8 @@
+# Vai trò: Khởi động ứng dụng ở trạng thái sạch và đi qua bước kiểm tra kết nối.
+# Cách hoạt động: Mở lại ứng dụng, xác nhận môi trường E2E rồi chờ màn chọn đối tượng.
 appId: com.xoicotam.mobile.e2e
 ---
-# A new JS process resets the in-memory order reducer and role session.
+# Tiến trình JS mới đặt lại đơn hàng trong bộ nhớ và phiên vai trò.
 - launchApp:
     clearState: true
 - scrollUntilVisible:
@@ -12,7 +14,7 @@ appId: com.xoicotam.mobile.e2e
     text: "E2E.*"
 - tapOn:
     id: "connection-check"
-# Wait for the real connection-gate transition, including its reveal timer.
+# Chờ bước chuyển màn hình kiểm tra kết nối, kể cả thời gian hiển thị của nó.
 - extendedWaitUntil:
     visible:
       id: "audience-customer"

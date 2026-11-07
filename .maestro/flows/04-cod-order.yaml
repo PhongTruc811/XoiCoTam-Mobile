@@ -1,3 +1,5 @@
+# Vai trò: Kiểm tra quy trình đặt món thanh toán khi nhận hàng (COD).
+# Cách hoạt động: Tạo đơn mẫu, xác nhận COD rồi tìm đơn và trạng thái trong lịch sử.
 appId: com.xoicotam.mobile.e2e
 name: "M04 - Confirm a COD order and find it in my orders"
 tags:
@@ -30,6 +32,7 @@ tags:
     direction: DOWN
 - tapOn:
     id: "cod-confirm"
+# Đơn mô phỏng phải xuất hiện trong lịch sử với trạng thái COD tương ứng.
 - extendedWaitUntil:
     visible:
       text: ".*Đặt món thành công.*mô phỏng.*"

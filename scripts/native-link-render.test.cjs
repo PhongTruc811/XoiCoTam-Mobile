@@ -92,7 +92,7 @@ function loadScreen(relativeFile, theme, activeScreen = 'index') {
     },
     '@/features/session/provider': { RoleSessionProvider: Host, useRoleSession: () => ({ activeScreen, shipperIdentity: 'Bố Khanh', goBack: () => {} }) },
     '@/features/session/role/back-button': { BackButton: () => null },
-    '@/features/session/role/employee-pin-modal': { EmployeePinModal: () => null },
+    '@/features/session/role/staff-login-modal': { StaffLoginModal: () => null },
     '@/features/session/use-swipe-back': { useSwipeBack: () => ({ panHandlers: {}, swipeStyle: {} }) },
     './back-button': { BackButton: () => null },
     '../use-swipe-back': { useSwipeBack: () => ({ panHandlers: {}, swipeStyle: {} }) },

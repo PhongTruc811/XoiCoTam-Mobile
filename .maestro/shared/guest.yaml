@@ -1,3 +1,5 @@
+# Vai trò: Đưa ứng dụng vào khu vực đặt món của khách vãng lai.
+# Cách hoạt động: Chạy bước khởi động, chọn khách hàng và vào không cần tài khoản.
 appId: com.xoicotam.mobile.e2e
 ---
 - runFlow: start.yaml

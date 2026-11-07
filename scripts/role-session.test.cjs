@@ -38,10 +38,7 @@ test('shipper must choose an identity before entering the workspace', () => {
   assert.equal(getEntryScreen(false, 'employee', null, 'shipper', false, 'Bobo'), 'index');
 });
 
-test('employee routes remain unavailable before a correct six-digit PIN', () => {
-  const { isEmployeePinValid } = require('../src/features/session/employee-pin.ts');
-  for (const pin of ['', '24681', '2468100', 'abcdef', '000000']) assert.equal(isEmployeePinValid(pin), false);
-  assert.equal(isEmployeePinValid('246810'), true);
+test('employee routes remain unavailable before server authentication', () => {
   for (const role of [null, 'staff', 'boss', 'shipper']) {
     assert.equal(getEntryScreen(true, 'employee', null, role, false, 'Bobo', false), 'roles');
   }

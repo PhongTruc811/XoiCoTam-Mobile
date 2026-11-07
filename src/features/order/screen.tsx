@@ -18,7 +18,7 @@ import { Badge, styles } from './ui';
 
 const sections: Record<Role, { id: string; label: string }[]> = {
   customer: [{ id: 'menu', label: 'Đặt món' }, { id: 'orders', label: 'Đơn của tôi' }],
-  staff: [{ id: 'new', label: 'Đơn mới' }, { id: 'ready', label: 'Chờ bàn giao' }],
+  staff: [{ id: 'new', label: 'Đơn mới' }, { id: 'ready', label: 'Đã tiếp nhận' }],
   shipper: [{ id: 'delivering', label: 'Đơn cần giao' }, { id: 'finished', label: 'Hoàn thành đơn' }],
   boss: [{ id: 'overview', label: 'Tổng quan' }, { id: 'store', label: 'Cửa hàng' }, { id: 'daily-post', label: 'Bài đăng hằng ngày' }],
 };
@@ -78,7 +78,7 @@ export function RoleWorkspace({ role, children }: RoleWorkspaceProps) {
           <View style={screenStyles.container}>
             <View style={styles.row}>
               <ThemedText testID={`workspace-${role}`} type="smallBold">{currentRole?.label}</ThemedText>
-              <Badge label={storeOpen ? 'Quán đang mở' : 'Quán đã đóng'} />
+              {role !== 'staff' && <Badge label={storeOpen ? 'Quán đang mở' : 'Quán đã đóng'} />}
             </View>
             <View style={screenStyles.sections}>
               {sections[role].map(section => {

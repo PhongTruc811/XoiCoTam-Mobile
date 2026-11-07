@@ -7,11 +7,11 @@ import { API_BASE_URL } from '@/config/api';
 export type Group = { id: string; name: string; url: string };
 export type Asset = { name: string; url: string; bytes: number };
 export type Content = { text: string; images: Asset[]; groups: Group[] };
-export type Settings = { enabled: boolean; times: string[]; pausedDay: string | null };
+export type Settings = { isEnabled: boolean; times: string[]; pausedDay: string | null };
 export type ScheduleEntry = { time: string; outcome: string };
 export type Schedule = { status: string; enabled: boolean; times: string[]; nextRunAt: number | null; entries: ScheduleEntry[]; busy: boolean };
 export type JobItem = { group: Group; status: string; message: string; postUrl?: string | null };
-export type Job = { id: string; source: string; createdAt: string; status: string; mode: 'LIVE' | 'PREPARE'; items: JobItem[] };
+export type Job = { id: string; source: string; createdAt: string; status: string; mode: 'LIVE' | 'PREPARE'; result: JobItem[] };
 export type Dashboard = {
   content: Content; settings: Settings; schedule: Schedule; mode: 'LIVE' | 'PREPARE';
   busy: boolean; today: string; jobs: Job[]; slots: { key: string; outcome: string }[];
@@ -54,7 +54,7 @@ export const dailyApi = {
     `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`),
   logout: () => request<null>('/api/auth/logout', 'POST'),
   dashboard: () => request<Dashboard>('/api/dashboard'),
-  saveSettings: (enabled: boolean, times: string[]) => request<Settings>('/api/settings', 'PUT', JSON.stringify({ enabled, times })),
+  saveSettings: (enabled: boolean, times: string[]) => request<Settings>('/api/settings', 'PUT', JSON.stringify({ isEnabled: enabled, times })),
   post: (requestId: string, groupIds: string[]) => request<{ id: string; status: string }>('/api/jobs', 'POST', JSON.stringify({ requestId, groupIds })),
   pause: () => request<Settings>('/api/pause-today', 'POST'),
   resume: () => request<Settings>('/api/resume-today', 'POST'),

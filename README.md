@@ -1,56 +1,87 @@
-# Welcome to your Expo app 👋
+# Xôi Cô Tấm Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Ứng dụng di động của dự án **Xôi Cô Tấm**, xây dựng với React Native, Expo và TypeScript. App giới thiệu trải nghiệm đặt món và quản lý giao nhận theo từng vai trò.
 
-## Get started
+## Tổng quan
 
-1. Install dependencies
+Ứng dụng hiện có luồng kiểm tra kết nối máy chủ, chọn nhóm người dùng và mở giao diện theo vai trò:
 
-   ```bash
-   npm install
-   ```
+| Vai trò | Trải nghiệm chính |
+| --- | --- |
+| **Khách hàng** | Chọn món, nhập thông tin nhận hàng, xem lại đơn và theo dõi trạng thái. |
+| **Nhân viên** | Đăng nhập bằng tài khoản STAFF, xem và tiếp nhận đơn COD từ backend. |
+| **Shipper** | Xem đơn được giao, thông tin nhận hàng và cập nhật quá trình giao. |
+| **Quản lý** | Theo dõi trạng thái hoạt động của quán và tình hình đơn hàng. |
 
-2. Start the app
+Giao diện đăng nhập/đăng ký và một số bước trong quy trình được dựng để minh họa trải nghiệm sản phẩm.
 
-   ```bash
-   npx expo start
-   ```
+## Trạng thái hiện tại
 
-In the output, you'll find options to open the app in a
+Đây là **bản prototype đang phát triển**. Ứng dụng có thể kiểm tra kết nối với backend; các thao tác đặt hàng, lưu trạng thái đơn, thanh toán QR, thu tiền và hoàn tiền hiện được mô phỏng trong app. Đơn mẫu chỉ tồn tại trong phiên chạy và không đại diện cho giao dịch thật.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Nhánh nhân viên đăng nhập qua backend và cần tài khoản STAFF hợp lệ. Hình ảnh món ăn chỉ mang tính minh họa.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Công nghệ và cấu trúc
 
-## Get a fresh project
+- **Expo SDK 58**, **React Native 0.88** và **TypeScript**.
+- **Expo Router** quản lý màn hình và điều hướng.
+- **Reanimated** và **Gesture Handler** hỗ trợ chuyển động và thao tác vuốt.
+- Cấu trúc theo tính năng, với các phần chính trong `src/features/`:
+  - `be-connection/`: kiểm tra kết nối backend.
+  - `session/`: phiên sử dụng, chọn vai trò và điều hướng.
+  - `order/`: giao diện và trạng thái đơn hàng mẫu.
+- `src/app/` chứa route; `src/components/` chứa thành phần giao diện dùng chung.
 
-When you're ready, run:
+## Chạy ứng dụng
+
+Tại thư mục dự án mobile:
 
 ```bash
-npm run reset-project
+npm ci
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Tạo `.env.local` cạnh `package.json`, rồi cấu hình URL gốc của backend:
 
-### Other setup steps
+```dotenv
+EXPO_PUBLIC_API_URL=http://<dia-chi-backend>:<cong>
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Ứng dụng kiểm tra endpoint `GET /api/backend-status`. Backend cần trả về HTTP thành công và JSON có `"status": "SUCCESS"`.
 
-## Learn more
+Khởi động Expo:
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+npm start
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Có thể chọn mở ứng dụng trên thiết bị hoặc môi trường chạy được Expo hỗ trợ. Trên điện thoại thật, địa chỉ backend phải truy cập được từ điện thoại; `localhost` sẽ trỏ về chính điện thoại.
 
-## Join the community
+Khi laptop đổi Wi-Fi hoặc nhận IP mới, chạy script từ thư mục gốc dự án để cập nhật `.env.local` theo IPv4 Wi-Fi hiện tại:
 
-Join our community of developers creating universal apps.
+```powershell
+.\scripts\Check-EXPO_PUBLIC_API_URL.ps1
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Script in URL hiện có, tên Wi-Fi (SSID) và IPv4 Wi-Fi hiện tại. Nếu hai IP khác nhau, chọn `y` để cập nhật `.env.local` hoặc `n` để kết thúc mà không sửa file. Nếu hai IP đã khớp, script chuyển thẳng đến câu hỏi chạy Expo. Sau khi cập nhật, script cũng hỏi có chạy `npx expo start` trong thư mục mobile không: `y` để chạy, `n` để bỏ qua. Cổng backend mặc định là `8080`; có thể đổi bằng `-Port 8081`. Nếu có nhiều adapter Wi-Fi đang hoạt động, chọn bằng `-InterfaceAlias 'Wi-Fi'`. Nếu Expo đã chạy, chọn `n` rồi **Reload** app trong Expo Go để nhận URL mới. iPhone và laptop cần ở cùng mạng Wi-Fi.
+
+## Dành cho nhà phát triển
+
+Các lệnh thường dùng:
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+```
+
+Tài liệu thiết kế và kịch bản kiểm thử nằm trong [docs](./docs/) và [Mobile_Testing.md](./Mobile_Testing.md).
+
+## Tài liệu
+
+- [Phác thảo luồng đặt món](./docs/online-order-prototype.md)
+- [Nguyên tắc tổ chức mã nguồn](./docs/Design-Patterns.md)
+- [Hướng dẫn kiểm thử mobile](./Mobile_Testing.md)
+
+---
+
+[Expo](https://expo.dev) · React Native · TypeScript

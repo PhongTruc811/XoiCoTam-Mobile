@@ -1,3 +1,5 @@
+# Vai trò: Mở màn xem lại đơn để các kịch bản tiếp tục kiểm tra hoặc đặt hàng.
+# Cách hoạt động: Cuộn tới nút xem lại, mở màn hình và kiểm tra tên người nhận mẫu.
 appId: com.xoicotam.mobile.e2e
 ---
 - scrollUntilVisible:

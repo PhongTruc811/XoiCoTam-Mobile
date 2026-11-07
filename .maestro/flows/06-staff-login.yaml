@@ -1,0 +1,24 @@
+# Current staff UI requires server credentials. This offline E2E flow checks the login gate only.
+appId: com.xoicotam.mobile.e2e
+name: "M06 - Staff login requires username and password"
+tags:
+  - regression
+---
+- runFlow: ../shared/start.yaml
+- tapOn:
+    id: "audience-employee"
+- extendedWaitUntil:
+    visible:
+      id: "staff-username"
+    timeout: 10000
+- assertVisible:
+    id: "staff-password"
+- tapOn:
+    id: "staff-login"
+- assertVisible: "Nhập tài khoản và mật khẩu nhân viên."
+- assertNotVisible:
+    id: "workspace-staff"
+- takeScreenshot: M06-staff-login-required
+- tapOn: "Hủy"
+- assertVisible:
+    id: "audience-employee"

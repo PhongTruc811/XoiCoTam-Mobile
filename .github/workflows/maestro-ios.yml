@@ -1,3 +1,6 @@
+# Workflow kiểm thử iOS bằng Maestro trên máy macOS do GitHub Actions cung cấp.
+# Chạy thủ công: kiểm tra mã nguồn, tạo và cài app lên Simulator, rồi chạy bộ test đã chọn.
+# Log, kết quả và ảnh chụp được lưu thành artifact để xem lại sau mỗi lượt chạy.
 name: Maestro iOS
 on:
   workflow_dispatch:
@@ -19,12 +22,14 @@ permissions:
   contents: read
 concurrency:
   group: maestro-ios-${{ github.ref }}
+  # Không hủy lượt kiểm thử đang chạy khi có lượt mới trên cùng nhánh.
   cancel-in-progress: false
 jobs:
   ios:
     runs-on: macos-26
     timeout-minutes: 90
     env:
+      # Test dùng dữ liệu giả lập, không phụ thuộc vào backend đang hoạt động.
       EXPO_PUBLIC_E2E_MOCK_BACKEND: 'true'
       CI: '1'
       MAESTRO_VERSION: '2.12.1'
@@ -51,6 +56,7 @@ jobs:
           npm run lint -- --no-cache
           npm run typecheck
           npm test
+      # Tạo thư mục iOS trên runner vì dự án dùng Expo prebuild và không lưu mã native trong repo.
       - name: Generate native iOS project on the runner
         run: npx expo prebuild --platform ios --no-install
       - name: Install CocoaPods
@@ -97,6 +103,7 @@ jobs:
           esac
           case "$REPEAT_COUNT" in 1|3) ;; *) exit 2 ;; esac
           maestro --version | tee .maestro-artifacts/maestro-version.txt
+          # Chạy lại trên cùng bản app để kiểm tra độ ổn định của flow.
           for ((attempt=1; attempt<=REPEAT_COUNT; attempt++)); do
             output_dir="$GITHUB_WORKSPACE/.maestro-artifacts/run-$attempt"
             mkdir -p "$output_dir"
@@ -104,6 +111,7 @@ jobs:
               --output "$output_dir/results.xml" \
               --test-output-dir "$output_dir" --debug-output "$output_dir/debug" "$flow"
           done
+      # Vẫn lưu log và ảnh chụp khi test lỗi để tiện xem nguyên nhân.
       - name: Save logs and screenshots
         if: always()
         uses: actions/upload-artifact@v7

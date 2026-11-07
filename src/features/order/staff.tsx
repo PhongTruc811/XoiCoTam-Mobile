@@ -1,74 +1,80 @@
-import { useState } from 'react';
-import { View } from 'react-native';
-
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-
-import { money, shipperNames, type DemoOrder } from './model';
-import { useOrderDemo } from './provider';
-import { Badge, Button, Card, Choice, Copy, Dialog, Empty, Notice, OrderSummary, SectionTitle, styles } from './ui';
+import { useRoleSession } from '@/features/session/provider';
+import { money } from './model';
+import { StaffApiError, staffApi, type StaffOrder, type StaffOrdersPage } from './staff-api';
+import { Badge, Button, Card, Copy, Dialog, Empty, SectionTitle, styles } from './ui';
 
 export function StaffView({ page }: { page: string }) {
-  const { orders, storeOpen, dispatch } = useOrderDemo();
-  const [selectedId, setSelectedId] = useState<string>();
-  const [dialog, setDialog] = useState<'handoff' | 'contact'>();
-  const [shipper, setShipper] = useState<string>(shipperNames[0]);
-  const [contacted, setContacted] = useState(false);
-  const [refunded, setRefunded] = useState(false);
-  const [feedback, setFeedback] = useState('');
-  const selected = orders.find(order => order.id === selectedId);
-  const status = page === 'ready' ? 'ready' : 'new';
-  const visible = orders.filter(order => order.status === status);
-  const affected = orders.filter(order => ['new', 'ready'].includes(order.status));
-
-  function openContact(order: DemoOrder) {
-    setSelectedId(order.id); setContacted(false); setRefunded(false); setDialog('contact');
+  const { staffIdentity, staffSessionExpired } = useRoleSession();
+  const status = page === 'ready' ? 'ACCEPTED' : 'NEW';
+  const [pageNumber, setPageNumber] = useState(0);
+  const [ordersPage, setOrdersPage] = useState<StaffOrdersPage | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [selected, setSelected] = useState<StaffOrder | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState('');
+  const [accepting, setAccepting] = useState(false);
+  const handleError = useCallback((cause: unknown) => {
+    if (cause instanceof StaffApiError && cause.status === 401) staffSessionExpired();
+    return cause instanceof Error ? cause.message : 'Không thể tải dữ liệu. Vui lòng thử lại.';
+  }, [staffSessionExpired]);
+  const load = useCallback(async (targetPage: number) => {
+    if (!staffIdentity) return;
+    setLoading(true); setError('');
+    try { const result = await staffApi.orders(status, targetPage); setOrdersPage(result); setPageNumber(targetPage); }
+    catch (cause) { setError(handleError(cause)); }
+    finally { setLoading(false); }
+  }, [staffIdentity, status, handleError]);
+  useEffect(() => {
+    const timer = setTimeout(() => void load(0), 0);
+    return () => clearTimeout(timer);
+  }, [load]);
+  async function openDetail(id: string) {
+    setDetailLoading(true); setDetailError(''); setSelected(null);
+    try { setSelected(await staffApi.detail(id)); }
+    catch (cause) { setDetailError(handleError(cause)); }
+    finally { setDetailLoading(false); }
   }
-
-  return (
-    <View style={styles.gap}>
-      <SectionTitle eyebrow="Quầy tiếp nhận" title="Mỗi đơn đều được chăm chút" description="Tiếp nhận, đọc lưu ý của khách và bàn giao đúng người giao hàng." />
-      <View style={styles.row}>
-        <Badge label={orders.filter(order => order.status === 'new').length + ' đơn mới'} />
-        <Badge label={orders.filter(order => order.status === 'ready').length + ' chờ bàn giao'} />
-      </View>
-      {!storeOpen && <Notice title={'Quán đã đóng · ' + affected.length + ' đơn cần rà soát'}>Liên hệ khách trước khi huỷ đơn. Với đơn đã thanh toán, trao đổi và xác nhận việc hoàn tiền trước khi gỡ đơn.</Notice>}
-      {!!feedback && <Notice title="Đã cập nhật đơn mẫu">{feedback}</Notice>}
-      {visible.length === 0 && <Empty>Đơn ở bước này sẽ xuất hiện sau khi khách đặt món hoặc nhân viên tiếp nhận.</Empty>}
-      {visible.map(order => (
-        <Card key={order.id}>
-          <OrderSummary order={order} />
-          <Copy muted>Tiếp nhận lúc {order.createdAt}</Copy>
-          {order.status === 'new' && <Button testID={`staff-accept-${order.id}`}
-            label={order.method !== 'COD' && order.payment === 'unpaid' ? 'Đang chờ khách thanh toán' : 'Tiếp nhận đơn'}
-            disabled={order.method !== 'COD' && order.payment === 'unpaid'}
-            onPress={() => { dispatch({ type: 'accept', id: order.id }); setFeedback(order.id + ' đã tiếp nhận, đang chờ bàn giao.'); }} />}
-          {order.status === 'ready' && !order.shipper && <Button testID={`staff-handoff-${order.id}`} label="Chọn shipper & bàn giao" onPress={() => { setSelectedId(order.id); setDialog('handoff'); }} />}
-          <Button secondary label={!storeOpen ? 'Liên hệ khách & xử lý hết món' : 'Xem thông tin liên hệ'} onPress={() => openContact(order)} />
-        </Card>
-      ))}
-
-      <Dialog title="Bàn giao đơn" visible={dialog === 'handoff'} onClose={() => setDialog(undefined)}>
-        {selected && <>
-          <OrderSummary order={selected} compact />
-          <Copy>Chọn shipper nhận đơn trực tiếp tại quầy.</Copy>
-          {shipperNames.map(name => <Choice key={name} label={name} selected={shipper === name} onPress={() => setShipper(name)} />)}
-          <Button label="Xác nhận bàn giao" onPress={() => { dispatch({ type: 'handoff', id: selected.id, shipper }); setFeedback(selected.id + ' đã bàn giao cho ' + shipper + '.'); setDialog(undefined); }} />
-        </>}
-      </Dialog>
-
-      <Dialog title={storeOpen ? 'Liên hệ người nhận' : 'Xử lý đơn khi hết món'} visible={dialog === 'contact'} onClose={() => setDialog(undefined)}>
-        {selected && <>
-          <OrderSummary order={selected} />
-          <Button secondary label={contacted ? '✓ Đã liên hệ khách (mô phỏng)' : 'Mô phỏng gọi khách · ' + selected.phone} onPress={() => setContacted(true)} />
-          {!storeOpen && <>
-            <Copy muted>Thông báo quán đã hết món và thống nhất cách xử lý với khách.</Copy>
-            {selected.payment === 'paid' && <Choice label={'Đã thống nhất & hoàn lại ' + money(selected.price)} detail="Chỉ đánh dấu trong bản mẫu, không có giao dịch hoàn tiền." selected={refunded} onPress={() => setRefunded(!refunded)} />}
-            <Button label="Huỷ & gỡ khỏi danh sách xử lý" disabled={!contacted || (selected.payment === 'paid' && !refunded)}
-              onPress={() => { dispatch({ type: 'cancel', id: selected.id, contacted, refundConfirmed: refunded }); setFeedback(selected.id + ' đã được gỡ khỏi danh sách xử lý sau khi liên hệ khách.'); setDialog(undefined); }} />
-            <ThemedText type="small" themeColor="textSecondary">Khách vẫn thấy thông báo huỷ / hoàn tiền trong bản mẫu để dễ kiểm tra luồng.</ThemedText>
-          </>}
-        </>}
-      </Dialog>
-    </View>
-  );
+  async function accept() {
+    if (!selected || accepting) return;
+    setAccepting(true); setDetailError('');
+    try { const saved = await staffApi.accept(selected.id); setSelected(saved); await load(0); }
+    catch (cause) { setDetailError(handleError(cause)); }
+    finally { setAccepting(false); }
+  }
+  return <View style={styles.gap}>
+    <SectionTitle eyebrow="Quầy tiếp nhận" title={status === 'NEW' ? 'Đơn mới' : 'Đã tiếp nhận'} description="Đơn COD được tải từ máy chủ." />
+    <View style={styles.row}><Badge label={`${ordersPage?.totalElements ?? 0} đơn ${status}`} /><Button secondary label="Tải lại" onPress={() => void load(0)} disabled={loading} /></View>
+    {loading && <ActivityIndicator accessibilityLabel="Đang tải đơn" />}
+    {!!error && <Card><ThemedText accessibilityLiveRegion="polite">{error}</ThemedText><Button label="Thử lại" onPress={() => void load(pageNumber)} /></Card>}
+    {!loading && !error && ordersPage?.items.length === 0 && <Empty>Chưa có đơn {status}.</Empty>}
+    {!error && ordersPage?.items.map(order => <Card key={order.id}>
+      <View style={styles.row}><ThemedText type="smallBold">#{order.id.slice(0, 8)}</ThemedText><Badge label={order.status} /></View>
+      <Copy>{order.menuName} · {money(order.total)}</Copy><Copy muted>{order.name} · {order.phone}</Copy>
+      <Button secondary label="Xem chi tiết" testID={`staff-detail-${order.id}`} onPress={() => void openDetail(order.id)} />
+    </Card>)}
+    {!error && !!ordersPage && ordersPage.totalPages > 1 && <View style={styles.row}>
+      <Button secondary label="Trang trước" disabled={loading || pageNumber === 0} onPress={() => void load(pageNumber - 1)} />
+      <Copy>Trang {pageNumber + 1}/{ordersPage.totalPages}</Copy>
+      <Button secondary label="Trang sau" disabled={loading || pageNumber + 1 >= ordersPage.totalPages} onPress={() => void load(pageNumber + 1)} />
+    </View>}
+    <Dialog title="Chi tiết đơn COD" visible={detailLoading || !!selected || !!detailError} onClose={() => { setSelected(null); setDetailError(''); }}>
+      {detailLoading && <ActivityIndicator accessibilityLabel="Đang tải chi tiết" />}
+      {!!detailError && <ThemedText accessibilityLiveRegion="polite">{detailError}</ThemedText>}
+      {selected && <>
+        <View style={styles.row}><ThemedText type="smallBold">#{selected.id}</ThemedText><Badge label={selected.status} /></View>
+        <Copy>{selected.menuName} · {money(selected.price)}</Copy>
+        <Copy>Tổng tiền: {money(selected.total)} · {selected.method} · {selected.payment}</Copy>
+        <Copy>{selected.name} · {selected.phone}</Copy><Copy>{selected.address}</Copy>
+        {!!selected.note && <Copy>Ghi chú: {selected.note}</Copy>}
+        <Copy muted>Đặt lúc: {selected.createdAt}</Copy>
+        {selected.acceptedAt && <Copy muted>Tiếp nhận lúc: {selected.acceptedAt} · {selected.acceptedBy}</Copy>}
+        {selected.status === 'NEW' && <Button label={accepting ? 'Đang tiếp nhận…' : 'Tiếp nhận đơn'} disabled={accepting} testID={`staff-accept-${selected.id}`} onPress={() => void accept()} />}
+        {selected.status === 'ACCEPTED' && <Copy muted>Chưa có thao tác bàn giao hoặc giao hàng trên máy chủ.</Copy>}
+      </>}
+    </Dialog>
+  </View>;
 }
